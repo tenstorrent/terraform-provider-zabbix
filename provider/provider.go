@@ -163,6 +163,7 @@ func providerConfigure(d *schema.ResourceData) (meta interface{}, err error) {
 	meta = api
 	log.Trace("Started zabbix provider got error: %+v", err)
 
+	log.Trace("--- providerConfigure() COMPLETED successfully ---")
 	return
 }
 

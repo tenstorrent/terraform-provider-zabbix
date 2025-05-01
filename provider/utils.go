@@ -5,6 +5,8 @@ import (
 	"github.com/ppodevlabs/go-zabbix-api"
 )
 
+// flattenHostGroupIds converts a list of Zabbix host group identifiers into a Terraform schema.Set.
+// This function is version-agnostic, working with both Zabbix 6.0 and 7.2 API responses.
 func flattenHostGroupIds(list zabbix.HostGroupIDs) *schema.Set {
 	s := schema.NewSet(schema.HashString, []interface{}{})
 	for _, v := range list {
@@ -21,6 +23,8 @@ func flattenTemplateIds(list zabbix.TemplateIDs) *schema.Set {
 	return s
 }
 
+// buildHostGroupIds converts a Terraform schema.Set into a list of Zabbix host group identifiers.
+// This function creates the minimal structure required for Zabbix API calls.
 func buildHostGroupIds(s *schema.Set) zabbix.HostGroupIDs {
 	list := s.List()
 

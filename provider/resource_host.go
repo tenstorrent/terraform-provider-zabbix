@@ -376,6 +376,7 @@ var hostSchemaBase = map[string]*schema.Schema{
 
 // resourceHost terraform host resource entrypoint
 func resourceHost() *schema.Resource {
+	log.Trace("--- resourceHost() ENTERED ---")
 	return &schema.Resource{
 		Create: resourceHostCreate,
 		Read:   resourceHostRead,
@@ -398,6 +399,7 @@ func dataHost() *schema.Resource {
 
 // hostResourceSchema adjust a base schema for resource usage
 func hostResourceSchema(m map[string]*schema.Schema) (o map[string]*schema.Schema) {
+	log.Trace("--- hostResourceSchema() ENTERED ---")
 	o = map[string]*schema.Schema{}
 	for k, v := range m {
 		schema := *v
@@ -546,6 +548,7 @@ func hostGenerateInventory(d *schema.ResourceData) (zabbix.Inventory, error) {
 
 // buildHostObject create host struct
 func buildHostObject(d *schema.ResourceData, m interface{}) (*zabbix.Host, error) {
+	log.Trace("--- buildHostObject() ENTERED for host: %s ---", d.Get("host").(string))
 	api := m.(*zabbix.API)
 	proxyId := d.Get("proxyid").(string)
 	item := zabbix.Host{
@@ -564,7 +567,16 @@ func buildHostObject(d *schema.ResourceData, m interface{}) (*zabbix.Host, error
 		item.Status = 1
 	}
 
-	item.GroupIds = buildHostGroupIds(d.Get("groups").(*schema.Set))
+	// Assign groups based on Zabbix version
+	groupsSet := d.Get("groups").(*schema.Set)
+	if api.Config.Version < 70000 {
+		item.GroupIds = buildHostGroupIds(groupsSet)
+		log.Trace("Assigning groups to item.GroupIds for create/update (Zabbix < 7.0)")
+	} else {
+		item.HostGroups = buildHostGroupIds(groupsSet)
+		log.Trace("Assigning groups to item.HostGroups for create/update (Zabbix >= 7.0)")
+	}
+
 	item.TemplateIDs = buildTemplateIds(d.Get("templates").(*schema.Set))
 
 	interfaces, err := hostGenerateInterfaces(d, m)
@@ -646,41 +658,57 @@ func dataHostRead(d *schema.ResourceData, m interface{}) error {
 
 // resourceHostRead read handler for resource
 func resourceHostRead(d *schema.ResourceData, m interface{}) error {
-	log.Debug("Lookup of hostgroup with id %s", d.Id())
+	log.Trace("--- resourceHostRead ENTERED for host ID: %s ---", d.Id())
+	log.Trace("Lookup of hostgroup with id %s", d.Id())
 
-	return hostRead(d, m, zabbix.Params{
+	// Determine parameters based on Zabbix version
+	params := zabbix.Params{
 		"selectInterfaces":      "extend",
 		"selectParentTemplates": "extend",
-		"selectGroups":          "extend",
 		"selectMacros":          "extend",
 		"selectTags":            "extend",
 		"selectInventory":       "extend",
 		"hostids":               d.Id(),
-	})
+	}
+	// Get API version from connection meta
+	api := m.(*zabbix.API)
+	if api.Config.Version < 70000 {
+		log.Trace("Using selectGroups for Zabbix version < 7.0")
+		params["selectGroups"] = "extend"
+	} else {
+		log.Trace("Using selectHostGroups for Zabbix version >= 7.0")
+		params["selectHostGroups"] = "extend"
+	}
+
+	return hostRead(d, m, params)
 }
 
 // hostRead common host read function
 func hostRead(d *schema.ResourceData, m interface{}, params zabbix.Params) error {
 	api := m.(*zabbix.API)
 
-	log.Debug("Lookup of host with params %#v", params)
+	log.Trace("--- hostRead ENTERED for host ID: %s ---", d.Id())
+	log.Trace("Lookup of host with params %#v", params)
 
 	hosts, err := api.HostsGet(params)
+	log.Trace("--- hostRead(): api.HostsGet completed. Error: %v, Host Count: %d ---", err, len(hosts))
 
 	if err != nil {
 		return err
 	}
 
 	if len(hosts) < 1 {
+		log.Trace("--- hostRead(): No hosts found for params, setting ID empty. ---")
 		d.SetId("")
 		return nil
 	}
 	if len(hosts) > 1 {
+		log.Trace("--- hostRead(): Multiple hosts found, returning error. ---")
 		return errors.New("multiple hosts found")
 	}
 	host := hosts[0]
 
-	log.Debug("Got host: %+v", host)
+	log.Trace("Got host: %+v", host)
 
 	d.SetId(host.HostID)
 	d.Set("name", host.Name)
@@ -696,7 +724,49 @@ func hostRead(d *schema.ResourceData, m interface{}, params zabbix.Params) error
 	d.Set("interface", flattenHostInterfaces(host, d, m))
 	d.Set("templates", flattenTemplateIds(host.ParentTemplateIDs))
 	d.Set("inventory", flattenInventory(host))
-	d.Set("groups", flattenHostGroupIds(host.GroupIds))
+
+	// Handle groups properly based on Zabbix version
+	var apiGroups zabbix.HostGroupIDs
+	if api.Config.Version < 70000 {
+		apiGroups = host.GroupIds
+		log.Trace("Reading groups from host.GroupIds (Zabbix < 7.0)")
+	} else {
+		apiGroups = host.HostGroups
+		log.Trace("Reading groups from host.HostGroups (Zabbix >= 7.0)")
+	}
+
+	if len(apiGroups) > 0 {
+		// Explicitly create a slice of strings for the group IDs.
+		// This avoids potential comparison issues with schema.Set by letting the SDK
+		// handle the conversion from a simple string slice to the internal Set type.
+		groupIds := make([]string, len(apiGroups))
+		for i, group := range apiGroups {
+			groupIds[i] = group.GroupID
+		}
+		log.Trace("Read group IDs from API for host %s: %v", host.HostID, groupIds)
+		// Use the slice of strings with d.Set; the SDK handles converting to schema.Set
+		if err := d.Set("groups", groupIds); err != nil {
+			return fmt.Errorf("Error setting groups for host %s: %s", host.HostID, err)
+		}
+		// Log the state *after* setting it to see how the SDK stored it.
+		log.Trace("State for 'groups' after d.Set (host %s): %#v", host.HostID, d.Get("groups"))
+	} else {
+		log.Trace("No groups found for host %s in API response (using version-specific field), setting empty set.", host.HostID)
+		// Ensure "groups" is explicitly set to an empty set if no groups are returned
+		if err := d.Set("groups", schema.NewSet(schema.HashString, []interface{}{})); err != nil {
+			return fmt.Errorf("Error setting empty groups for host %s: %s", host.HostID, err)
+		}
+		// Log the state *after* setting it to see how the SDK stored it.
+		log.Trace("State for 'groups' after d.Set to empty (host %s): %#v", host.HostID, d.Get("groups"))
+	}
+
+	// --- DEBUG PANIC in Read ---
+	// Force a panic after attempting to set groups to inspect API data and resulting state.
+	// REMOVE THIS AFTER DEBUGGING.
+	// panic(fmt.Sprintf("DEBUG PANIC after setting groups in hostRead (HostID: %s):\nRaw API Group Data: %#v\nState via d.Get(\"groups\"): %#v",
+	// 	host.HostID, host.GroupIds, d.Get("groups")))
+	// --- END DEBUG PANIC ---
+
 	d.Set("macro", flattenMacros(host.UserMacros))
 	d.Set("tag", flattenTags(host.Tags))
 
@@ -777,34 +847,83 @@ func flattenHostInterfaces(host zabbix.Host, d *schema.ResourceData, m interface
 
 // resourceHostUpdate terraform update resource handler
 func resourceHostUpdate(d *schema.ResourceData, m interface{}) error {
+	// --- DEBUG PANIC ON ENTRY ---
+	// Force a panic immediately upon entering this function during apply.
+	// REMOVE THIS AFTER DEBUGGING.
+	// panic(fmt.Sprintf("DEBUG PANIC: Entered resourceHostUpdate for host %s", d.Id()))
+	// --- END DEBUG PANIC ---
+
+	log.Trace("--- resourceHostUpdate ENTERED for host ID: %s ---", d.Id())
 	api := m.(*zabbix.API)
 
 	item, err := buildHostObject(d, m)
-
 	if err != nil {
 		return err
 	}
 
-	// templates may need a bit extra effort
+	// Handle template changes
 	if d.HasChange("templates") {
 		old, new := d.GetChange("templates")
 		diff := old.(*schema.Set).Difference(new.(*schema.Set))
 
-		// removals, we need to unlink and clear
+		// Handle template removals
 		if diff.Len() > 0 {
 			item.TemplateIDsClear = buildTemplateIds(diff)
 		}
+	}
+
+	// Handle group changes
+	if d.HasChange("groups") {
+		old, new := d.GetChange("groups")
+		log.Trace("Change detected for 'groups' (host %s)", d.Id())
+		log.Trace("Old groups state: %#v", old)
+		log.Trace("New groups config: %#v", new)
+
+		// --- DEBUG PANIC ---
+		// Force a panic to inspect the data structures when logging fails.
+		// REMOVE THIS AFTER DEBUGGING.
+		// panic(fmt.Sprintf("DEBUG PANIC: Change detected for 'groups'.\nOld State: %#v\nNew Config: %#v", old, new))
+		// --- END DEBUG PANIC ---
+
+		newSet := new.(*schema.Set)
+
+		// Always send the complete new set of groups when there's a change
+		// This ensures idempotency and matches Zabbix's expectation of receiving
+		// the complete list of groups to be set
+		// NOTE: Assign to the correct field based on version
+		builtGroups := buildHostGroupIds(newSet)
+		if api.Config.Version < 70000 {
+			item.GroupIds = builtGroups
+			log.Trace("Assigning groups update to item.GroupIds (Zabbix < 7.0)")
+		} else {
+			item.HostGroups = builtGroups
+			log.Trace("Assigning groups update to item.HostGroups (Zabbix >= 7.0)")
+		}
+	} else {
+		// If groups haven't changed, don't include them in the update
+		// This prevents unnecessary API calls and potential conflicts
+		// item.HostGroups = nil // Set both to nil just in case, though only one should be used by API lib based on create/update specifics
+		item.GroupIds = nil
+		item.HostGroups = nil
 	}
 
 	item.HostID = d.Id()
 
 	items := []zabbix.Host{*item}
 
-	err = api.HostsUpdate(items)
+	// --- DEBUG PANIC Before Update Call ---
+	// Force a panic to inspect the data being sent to the API library.
+	// REMOVE THIS AFTER DEBUGGING.
+	// panic(fmt.Sprintf("DEBUG PANIC Before api.HostsUpdate (HostID: %s):\nItem Data: %#v", d.Id(), items))
+	// --- END DEBUG PANIC ---
 
+	log.Trace("Calling api.HostsUpdate for host %s with item data: %#v", d.Id(), items)
+	err = api.HostsUpdate(items)
 	if err != nil {
+		log.Trace("api.HostsUpdate for host %s returned error: %s", d.Id(), err)
 		return err
 	}
+	log.Trace("api.HostsUpdate for host %s completed without error.", d.Id())
 
 	return resourceHostRead(d, m)
 }
