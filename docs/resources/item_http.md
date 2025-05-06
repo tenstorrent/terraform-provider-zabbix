@@ -26,7 +26,7 @@ description: |-
 ### Optional
 
 - `applications` (Set of String) Application IDs to associate this item with
-- `auth_type` (String) HTTP auth type, one of: none, basic, ntlm, kerberos
+- `auth_type` (String) HTTP auth type, one of: ntlm, kerberos, none, basic
 - `delay` (String) Item Delay period
 - `description` (String) Item Description
 - `follow_redirects` (Boolean) follow http redirects
@@ -38,7 +38,7 @@ description: |-
 - `posts` (String) POST data to send in request
 - `preprocessor` (Block List) (see [below for nested schema](#nestedblock--preprocessor))
 - `proxy` (String) HTTP proxy connection string
-- `request_method` (String) HTTP request method, one of: head, get, post, put
+- `request_method` (String) HTTP request method, one of: get, post, put, head
 - `retrieve_mode` (String) HTTP retrieve mode, one of: body, headers, both
 - `status_codes` (String) http status code
 - `tag` (Block Set) (see [below for nested schema](#nestedblock--tag))

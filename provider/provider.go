@@ -62,6 +62,7 @@ func Provider() *schema.Provider {
 			"zabbix_proxy":       dataProxy(),
 			"zabbix_hostgroup":   dataHostgroup(),
 			"zabbix_template":    dataTemplate(),
+			"zabbix_proxygroup":  dataProxyGroup(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"zabbix_trigger":       resourceTrigger(),
@@ -70,6 +71,8 @@ func Provider() *schema.Provider {
 			"zabbix_hostgroup":     resourceHostgroup(),
 			"zabbix_host":          resourceHost(),
 			"zabbix_application":   resourceApplication(),
+			"zabbix_proxy":         resourceProxy(),
+			"zabbix_proxygroup":    resourceProxyGroup(),
 
 			"zabbix_graph":       resourceGraph(),
 			"zabbix_proto_graph": resourceProtoGraph(),
