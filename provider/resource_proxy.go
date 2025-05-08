@@ -22,8 +22,8 @@ var proxySchemaBase = map[string]*schema.Schema{
 
 // proxyModeMap maps between string and integer representations of proxy modes
 var proxyModeMap = map[string]int{
-	"active":  6,
-	"passive": 5,
+	"active":  0,
+	"passive": 1,
 }
 
 // proxyModeToString converts internal integer mode to string representation
@@ -104,6 +104,16 @@ func resourceProxy() *schema.Resource {
 				Optional:     true,
 				Default:      "active",
 				ValidateFunc: validation.StringInSlice([]string{"active", "passive"}, false),
+			},
+			"local_address": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "IP address or hostname used by the active proxy to connect to Zabbix server",
+				Optional:    true,
+			},
+			"local_port": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Port used by the active proxy to connect to Zabbix server",
+				Optional:    true,
 			},
 			"allowed_addresses": &schema.Schema{
 				Type:        schema.TypeString,
@@ -193,7 +203,7 @@ func resourceProxyCreate(d *schema.ResourceData, m interface{}) error {
 
 	proxy := zabbix.Proxy{
 		Host:             host,
-		Status:           strconv.Itoa(proxyModeMap[operatingMode]),
+		OperatingMode:    strconv.Itoa(proxyModeMap[operatingMode]),
 		Description:      d.Get("description").(string),
 		TLSConnect:       strconv.Itoa(tlsModes[d.Get("tls_connect").(string)]),
 		TLSAccept:        strconv.Itoa(tlsModes[d.Get("tls_accept").(string)]),
@@ -203,6 +213,8 @@ func resourceProxyCreate(d *schema.ResourceData, m interface{}) error {
 		TLSIssuer:        d.Get("tls_issuer").(string),
 		ProxyGroupID:     d.Get("proxy_groupid").(string),
 		AllowedAddresses: allowedAddresses,
+		LocalAddress:     d.Get("local_address").(string),
+		LocalPort:        d.Get("local_port").(string),
 	}
 
 	proxies := []zabbix.Proxy{proxy}
@@ -243,7 +255,7 @@ func proxyRead(d *schema.ResourceData, m interface{}, params zabbix.Params) erro
 		d.Set("name", proxy.Host)
 	} else {
 		d.Set("host", proxy.Host)
-		d.Set("operating_mode", proxyModeToString(proxy.Status))
+		d.Set("operating_mode", proxyModeToString(proxy.OperatingMode))
 		d.Set("description", proxy.Description)
 		d.Set("tls_connect", tlsModeToString(proxy.TLSConnect))
 		d.Set("tls_accept", tlsModeToString(proxy.TLSAccept))
@@ -252,6 +264,8 @@ func proxyRead(d *schema.ResourceData, m interface{}, params zabbix.Params) erro
 		d.Set("tls_issuer", proxy.TLSIssuer)
 		d.Set("proxy_groupid", proxy.ProxyGroupID)
 		d.Set("allowed_addresses", proxy.AllowedAddresses)
+		d.Set("local_address", proxy.LocalAddress)
+		d.Set("local_port", proxy.LocalPort)
 		// Don't set tls_psk as it's sensitive
 	}
 
@@ -280,7 +294,7 @@ func resourceProxyUpdate(d *schema.ResourceData, m interface{}) error {
 	proxy := zabbix.Proxy{
 		ProxyID:          d.Id(),
 		Host:             host,
-		Status:           strconv.Itoa(proxyModeMap[operatingMode]),
+		OperatingMode:    strconv.Itoa(proxyModeMap[operatingMode]),
 		Description:      d.Get("description").(string),
 		TLSConnect:       strconv.Itoa(tlsModes[d.Get("tls_connect").(string)]),
 		TLSAccept:        strconv.Itoa(tlsModes[d.Get("tls_accept").(string)]),
@@ -290,6 +304,8 @@ func resourceProxyUpdate(d *schema.ResourceData, m interface{}) error {
 		TLSIssuer:        d.Get("tls_issuer").(string),
 		ProxyGroupID:     d.Get("proxy_groupid").(string),
 		AllowedAddresses: allowedAddresses,
+		LocalAddress:     d.Get("local_address").(string),
+		LocalPort:        d.Get("local_port").(string),
 	}
 
 	proxies := []zabbix.Proxy{proxy}

@@ -20,6 +20,8 @@ description: |-
 - `allowed_addresses` (String) Comma-separated list of allowed IP addresses (required for active proxies)
 - `description` (String) Proxy description
 - `host` (String) Proxy hostname (required for passive proxies)
+- `local_address` (String) IP address or hostname used by the active proxy to connect to Zabbix server
+- `local_port` (String) Port used by the active proxy to connect to Zabbix server
 - `operating_mode` (String) Proxy operating mode (active or passive)
 - `proxy_groupid` (String) ID of the proxy group this proxy belongs to
 - `tls_accept` (String) Connections from proxy (none, psk, or certificate)

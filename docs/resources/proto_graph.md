@@ -28,7 +28,7 @@ description: |-
 - `legend` (Boolean) Show legend
 - `percent_left` (String) Left percentile
 - `percent_right` (String) Right percentile
-- `type` (String) Type, one of: stacked, pie, exploded, normal
+- `type` (String) Type, one of: normal, stacked, pie, exploded
 - `work_period` (Boolean) Show work period
 - `ymax` (String) Y Axis Max
 - `ymax_itemid` (String) Y Axis Max ItemId
@@ -51,7 +51,7 @@ Required:
 
 Optional:
 
-- `drawtype` (String) Draw Type, one of: gradient, line, filled, bold, dot, dashed
+- `drawtype` (String) Draw Type, one of: line, filled, bold, dot, dashed, gradient
 - `function` (String) Function, one of: average, max, all, last, min
 - `sortorder` (String) sort order
 - `type` (String) Type, one of: simple, sum

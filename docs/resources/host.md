@@ -25,7 +25,7 @@ description: |-
 - `enabled` (Boolean) Enable host for monitoring
 - `interface` (Block List) (see [below for nested schema](#nestedblock--interface))
 - `inventory` (Block List) (see [below for nested schema](#nestedblock--inventory))
-- `inventory_mode` (String) Inventory Mode, one of: automatic, disabled, manual
+- `inventory_mode` (String) Inventory Mode, one of: manual, automatic, disabled
 - `macro` (Block List) (see [below for nested schema](#nestedblock--macro))
 - `monitored_by` (String) 1 if monitored by proxy, else 0
 - `name` (String) Zabbix host displayname, defaults to the value of "host"

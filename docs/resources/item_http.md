@@ -26,7 +26,7 @@ description: |-
 ### Optional
 
 - `applications` (Set of String) Application IDs to associate this item with
-- `auth_type` (String) HTTP auth type, one of: ntlm, kerberos, none, basic
+- `auth_type` (String) HTTP auth type, one of: none, basic, ntlm, kerberos
 - `delay` (String) Item Delay period
 - `description` (String) Item Description
 - `follow_redirects` (Boolean) follow http redirects

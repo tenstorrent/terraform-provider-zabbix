@@ -24,7 +24,7 @@ description: |-
 
 ### Optional
 
-- `auth_type` (String) HTTP auth type, one of: ntlm, kerberos, none, basic
+- `auth_type` (String) HTTP auth type, one of: none, basic, ntlm, kerberos
 - `condition` (Block List) (see [below for nested schema](#nestedblock--condition))
 - `delay` (String) LLD Delay period
 - `evaltype` (String) EvalType, one of: andor, and, or, custom
