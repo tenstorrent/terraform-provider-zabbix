@@ -1,6 +1,7 @@
 # Visit https://goreleaser.com for documentation on how to customize this
 # behavior.
 version: 2
+project_name: terraform-provider-zabbix
 before:
   hooks:
     # this is just an example and not a requirement for provider building/publishing
@@ -50,7 +51,12 @@ signs:
       - "${signature}"
       - "--detach-sign"
       - "${artifact}"
+      - "--pinentry-mode"
+      - "loopback"
+      - "--passphrase"
+      - "{{ .Env.GPG_PASSPHRASE }}"
 release:
+  name_template: '{{ .ProjectName }} v{{ .Version }}'
   # If you want to manually examine the release before its live, uncomment this line:
   # disable: true
 changelog:

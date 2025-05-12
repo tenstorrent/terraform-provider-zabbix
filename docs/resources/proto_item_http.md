@@ -39,7 +39,7 @@ description: |-
 - `posts` (String) POST data to send in request
 - `preprocessor` (Block List) (see [below for nested schema](#nestedblock--preprocessor))
 - `proxy` (String) HTTP proxy connection string
-- `request_method` (String) HTTP request method, one of: get, post, put, head
+- `request_method` (String) HTTP request method, one of: head, get, post, put
 - `retrieve_mode` (String) HTTP retrieve mode, one of: body, headers, both
 - `status_codes` (String) http status code
 - `tag` (Block Set) (see [below for nested schema](#nestedblock--tag))

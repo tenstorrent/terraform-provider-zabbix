@@ -27,7 +27,7 @@ description: |-
 - `auth_type` (String) HTTP auth type, one of: none, basic, ntlm, kerberos
 - `condition` (Block List) (see [below for nested schema](#nestedblock--condition))
 - `delay` (String) LLD Delay period
-- `evaltype` (String) EvalType, one of: andor, and, or, custom
+- `evaltype` (String) EvalType, one of: or, custom, andor, and
 - `follow_redirects` (Boolean) follow http redirects
 - `formula` (String) Formula
 - `headers` (Map of String)
@@ -39,7 +39,7 @@ description: |-
 - `posts` (String) POST data to send in request
 - `preprocessor` (Block List) (see [below for nested schema](#nestedblock--preprocessor))
 - `proxy` (String) HTTP proxy connection string
-- `request_method` (String) HTTP request method, one of: get, post, put, head
+- `request_method` (String) HTTP request method, one of: head, get, post, put
 - `retrieve_mode` (String) HTTP retrieve mode, one of: body, headers, both
 - `status_codes` (String) http status code
 - `timeout` (String) http request timeout

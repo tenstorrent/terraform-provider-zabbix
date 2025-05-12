@@ -25,7 +25,7 @@ description: |-
 - `enabled` (Boolean) Enable host for monitoring
 - `interface` (Block List) (see [below for nested schema](#nestedblock--interface))
 - `inventory` (Block List) (see [below for nested schema](#nestedblock--inventory))
-- `inventory_mode` (String) Inventory Mode, one of: manual, automatic, disabled
+- `inventory_mode` (String) Inventory Mode, one of: disabled, manual, automatic
 - `macro` (Block List) (see [below for nested schema](#nestedblock--macro))
 - `monitored_by` (String) 1 if monitored by proxy, else 0
 - `name` (String) Zabbix host displayname, defaults to the value of "host"
@@ -55,7 +55,7 @@ Optional:
 - `snmp3_securityname` (String) Security Name (v3 only)
 - `snmp_bulk` (Boolean) SNMP Bulk
 - `snmp_community` (String) HSNMP Community (v1/v2 only)
-- `snmp_version` (String) SNMP Version, one of: 1, 2, 3
+- `snmp_version` (String) SNMP Version, one of: 2, 3, 1
 - `type` (String) Interface type
 
 Read-Only:

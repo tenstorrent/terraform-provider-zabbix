@@ -2,7 +2,7 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/ppodevlabs/go-zabbix-api"
+	"github.com/tenstorrent/go-zabbix-api"
 )
 
 // flattenHostGroupIds converts a list of Zabbix host group identifiers into a Terraform schema.Set.

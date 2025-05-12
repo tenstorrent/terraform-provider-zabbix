@@ -28,7 +28,7 @@ description: |-
 - `enabled` (Boolean) Enable this trigger
 - `manual_close` (Boolean) Manual resolution
 - `multiple` (Boolean) generate multiple events
-- `priority` (String) Trigger Priority level, one of: high, disaster, not_classified, info, warn, average
+- `priority` (String) Trigger Priority level, one of: average, high, disaster, not_classified, info, warn
 - `recovery_expression` (String) use recovery expression (recovery_none must not be true)
 - `recovery_none` (Boolean) set recovery mode to none
 - `tag` (Block Set) (see [below for nested schema](#nestedblock--tag))

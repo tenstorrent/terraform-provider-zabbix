@@ -33,11 +33,25 @@ jobs:
       -
         name: Import GPG key
         id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          # These secrets will need to be configured for the repository:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
+        run: |
+          # Install required tools
+          sudo apt-get update && sudo apt-get install -y gnupg
+
+          # Create temporary GPG directory
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          
+          # Import GPG private key from secret
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          
+          # Get fingerprint (last 16 chars of key ID)
+          GPG_FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
+          echo "fingerprint=$GPG_FINGERPRINT" >> $GITHUB_OUTPUT
+          
+          # Set up GPG for non-interactive signing
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          gpg-connect-agent reloadagent /bye
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
@@ -46,5 +60,6 @@ jobs:
           args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          # GitHub sets this automatically
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_TTY: $(tty)
+          GPG_PASSPHRASE: ${{ secrets.PASSPHRASE }}

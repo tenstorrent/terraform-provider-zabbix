@@ -26,7 +26,7 @@ description: |-
 
 - `condition` (Block List) (see [below for nested schema](#nestedblock--condition))
 - `delay` (String) LLD Delay period
-- `evaltype` (String) EvalType, one of: andor, and, or, custom
+- `evaltype` (String) EvalType, one of: or, custom, andor, and
 - `formula` (String) Formula
 - `interfaceid` (String) Host Interface ID
 - `lifetime` (String) LLD Stale Item Lifetime
@@ -40,7 +40,7 @@ description: |-
 - `snmp3_securitylevel` (String) Security Level (v3 only), one of: noauthnopriv, authnopriv, authpriv
 - `snmp3_securityname` (String) Security Name (v3 only)
 - `snmp_community` (String) SNMP Community (v1/v2 only)
-- `snmp_version` (String) SNMP Version, one of: 3, 1, 2
+- `snmp_version` (String) SNMP Version, one of: 1, 2, 3
 
 ### Read-Only
 

@@ -52,9 +52,9 @@ Required:
 Optional:
 
 - `drawtype` (String) Draw Type, one of: line, filled, bold, dot, dashed, gradient
-- `function` (String) Function, one of: average, max, all, last, min
+- `function` (String) Function, one of: min, average, max, all, last
 - `sortorder` (String) sort order
-- `type` (String) Type, one of: simple, sum
+- `type` (String) Type, one of: sum, simple
 - `yaxis_side` (String) Y Axis Side, one of: left, right
 
 Read-Only:

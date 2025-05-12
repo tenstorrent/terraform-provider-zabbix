@@ -34,7 +34,7 @@ go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
 "$(go env GOPATH)/bin/tfplugindocs" generate 
 
 # Use local path instead of registry path
-PLUGIN_DIR="$HOME/.terraform.d/plugins/local/ppodevlabs/zabbix/$VERSION/$ARCH"
+PLUGIN_DIR="$HOME/.terraform.d/plugins/local/tenstorrent/zabbix/$VERSION/$ARCH"
 
 # Create plugin directory if it doesn't exist
 mkdir -p "$PLUGIN_DIR"
