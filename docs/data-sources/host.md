@@ -20,7 +20,7 @@ description: |-
 - `enabled` (Boolean) Enable host for monitoring
 - `host` (String) FQDN of host
 - `hostid` (String)
-- `inventory_mode` (String) Inventory Mode, one of: disabled, manual, automatic
+- `inventory_mode` (String) Inventory Mode, one of: automatic, disabled, manual
 - `macro` (Block List) (see [below for nested schema](#nestedblock--macro))
 - `name` (String) Zabbix host displayname, defaults to the value of "host"
 - `tag` (Block Set) (see [below for nested schema](#nestedblock--tag))

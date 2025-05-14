@@ -41,8 +41,8 @@ jobs:
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           
-          # Import GPG private key from secret
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          # Import GPG private key from secret (base64 decoded)
+          echo "${{ secrets.GPG_PRIVATE_KEY_BASE64 }}" | base64 -d | gpg --batch --import
           
           # Get fingerprint (last 16 chars of key ID)
           GPG_FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
@@ -62,4 +62,4 @@ jobs:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_TTY: $(tty)
-          GPG_PASSPHRASE: ${{ secrets.PASSPHRASE }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

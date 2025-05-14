@@ -1,6 +1,7 @@
 # Release Process
 
 This document describes the process for releasing new versions of the Terraform Provider for Zabbix.
+It was mostly written by AI so there might be some stuff wrong in here, sorry. It'll get better as I have time.
 
 ## Prerequisites
 
@@ -50,6 +51,11 @@ gpg --list-secret-keys --keyid-format LONG
 # Export the private key (replace KEY_ID with your key ID)
 gpg --export-secret-keys --armor KEY_ID > private.key
 
+# Base64 encode the private key for GitHub Secrets
+cat private.key | base64 -w0
+# On a Mac:
+cat private.key | base64
+
 # Export the public key
 gpg --export --armor KEY_ID > public.key
 
@@ -61,6 +67,7 @@ unset GNUPGHOME
 
 1. Store the following in your secure password manager:
    - Private key (contents of private.key)
+   - Base64 encoded private key
    - Public key (contents of public.key)
    - Passphrase used during key generation
    - Key ID (from the --list-secret-keys output)
@@ -69,8 +76,8 @@ unset GNUPGHOME
    - Go to your GitHub repository settings
    - Navigate to "Secrets and variables" → "Actions"
    - Add the following secrets:
-     - `GPG_PRIVATE_KEY`: The contents of your private.key file
-     - `PASSPHRASE`: The passphrase you used when creating the GPG key
+     - `GPG_PRIVATE_KEY_BASE64`: The contents of your private.key.b64 file (base64 encoded private key)
+     - `GPG_PASSPHRASE`: The passphrase you used when creating the GPG key
 
 ### 4. Using the key for future releases
 
@@ -134,25 +141,70 @@ Before creating an official release tag, you can test the release process locall
 
 Note: GoReleaser uses Git tags to determine the version number, not the version in bumpver.toml or other files.
 
+## Local Development Workflow
+
+During active development, you can use the provided `build-local.sh` script to quickly build, test, and use the provider locally without going through the full release process:
+
+1. Make your code changes to the provider
+2. Run `./build-local.sh` to:
+   - Build the provider binary
+   - Generate documentation
+   - Install the provider to your local Terraform plugin directory at `~/.terraform.d/plugins/local/tenstorrent/zabbix/[VERSION]/[ARCH]`
+
+3. In your Terraform configuration, reference the local provider:
+   ```hcl
+   terraform {
+     required_providers {
+       zabbix = {
+         source  = "local/tenstorrent/zabbix"
+         version = "x.y.z" # Should match version in bumpver.toml or else leave it out
+       }
+     }
+   }
+   ```
+
+4. Run `terraform init` and `terraform plan/apply` to test your changes
+You probably have to `rm .terraform.lock.hcl` sometimes as well.
+
+This workflow allows you to rapidly iterate on provider development without needing to publish official releases.
+
 ## Releasing a New Version
 
-1. Update version numbers:
+1. Create a release branch:
+   ```bash
+   git checkout -b release/vX.Y.Z
+   ```
+
+2. Update version numbers:
    - Update `bumpver.toml` with the new version
    - Update any version references in the code
 
-2. Commit your changes:
+3. Commit your changes:
    ```bash
    git add .
    git commit -m "Prepare for vX.Y.Z release"
    ```
 
-3. Create and push a new tag:
+4. Push the branch and create a pull request:
+   ```bash
+   git push origin release/vX.Y.Z
+   ```
+   
+   **IMPORTANT**: When creating the PR, ensure you set the base repository to your repo and not upstream. Select the master branch as the base.
+
+5. After the PR is reviewed and merged to master, checkout the master branch:
+   ```bash
+   git checkout master
+   git pull
+   ```
+
+6. Create and push a new tag:
    ```bash
    git tag -a vX.Y.Z -m "Release vX.Y.Z"
    git push origin vX.Y.Z
    ```
 
-4. The GitHub Action will automatically:
+7. The GitHub Action will automatically:
    - Build the provider for all supported platforms
    - Create checksums
    - Sign the artifacts with your GPG key

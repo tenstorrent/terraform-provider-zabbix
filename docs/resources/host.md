@@ -25,7 +25,7 @@ description: |-
 - `enabled` (Boolean) Enable host for monitoring
 - `interface` (Block List) (see [below for nested schema](#nestedblock--interface))
 - `inventory` (Block List) (see [below for nested schema](#nestedblock--inventory))
-- `inventory_mode` (String) Inventory Mode, one of: disabled, manual, automatic
+- `inventory_mode` (String) Inventory Mode, one of: automatic, disabled, manual
 - `macro` (Block List) (see [below for nested schema](#nestedblock--macro))
 - `monitored_by` (String) 1 if monitored by proxy, else 0
 - `name` (String) Zabbix host displayname, defaults to the value of "host"
@@ -51,11 +51,11 @@ Optional:
 - `snmp3_contextname` (String) Context Name (v3 only)
 - `snmp3_privpassphrase` (String) Priv Passphrase (v3 only)
 - `snmp3_privprotocol` (String) Priv Protocol (v3 only), one of: des, aes
-- `snmp3_securitylevel` (String) Security Level (v3 only), one of: noauthnopriv, authnopriv, authpriv
+- `snmp3_securitylevel` (String) Security Level (v3 only), one of: authnopriv, authpriv, noauthnopriv
 - `snmp3_securityname` (String) Security Name (v3 only)
 - `snmp_bulk` (Boolean) SNMP Bulk
 - `snmp_community` (String) HSNMP Community (v1/v2 only)
-- `snmp_version` (String) SNMP Version, one of: 2, 3, 1
+- `snmp_version` (String) SNMP Version, one of: 3, 1, 2
 - `type` (String) Interface type
 
 Read-Only:

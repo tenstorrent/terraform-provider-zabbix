@@ -26,7 +26,7 @@ description: |-
 - `active` (Boolean) Active zabbix agent Item
 - `condition` (Block List) (see [below for nested schema](#nestedblock--condition))
 - `delay` (String) LLD Delay period
-- `evaltype` (String) EvalType, one of: or, custom, andor, and
+- `evaltype` (String) EvalType, one of: and, or, custom, andor
 - `formula` (String) Formula
 - `interfaceid` (String) Host Interface ID
 - `lifetime` (String) LLD Stale Item Lifetime

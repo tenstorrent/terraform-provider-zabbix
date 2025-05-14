@@ -21,7 +21,7 @@ description: |-
 - `key` (String) Item KEY
 - `name` (String) Item Name
 - `ruleid` (String) LLD Rule ID
-- `valuetype` (String) Item Value Type, one of: float, character, log, unsigned, text
+- `valuetype` (String) Item Value Type, one of: float, character, log, unsigned, text, binary
 
 ### Optional
 

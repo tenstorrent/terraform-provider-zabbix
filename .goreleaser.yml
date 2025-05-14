@@ -41,20 +41,11 @@ checksum:
   algorithm: sha256
 signs:
   - artifacts: checksum
+    cmd: bash
     args:
-      # if you are using this in a GitHub action or some other automated pipeline, you 
-      # need to pass the batch flag to indicate its not interactive.
-      - "--batch"
-      - "--local-user"
-      - "{{ .Env.GPG_FINGERPRINT }}" # set this environment variable for your signing key
-      - "--output"
-      - "${signature}"
-      - "--detach-sign"
-      - "${artifact}"
-      - "--pinentry-mode"
-      - "loopback"
-      - "--passphrase"
-      - "{{ .Env.GPG_PASSPHRASE }}"
+      - '-c'
+      - 'echo "{{ .Env.GPG_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback -u {{ .Env.GPG_FINGERPRINT }} --detach-sign --output ${signature} ${artifact}'
+    signature: "${artifact}.sig"
 release:
   name_template: '{{ .ProjectName }} v{{ .Version }}'
   # If you want to manually examine the release before its live, uncomment this line:
