@@ -9,4 +9,4 @@ require (
 	github.com/tpretz/go-zabbix-api v0.16.0 // indirect
 )
 
-replace github.com/tenstorrent/go-zabbix-api => ../go-zabbix-api
+// replace github.com/tenstorrent/go-zabbix-api => ../go-zabbix-api
