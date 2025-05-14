@@ -847,12 +847,6 @@ func flattenHostInterfaces(host zabbix.Host, d *schema.ResourceData, m interface
 
 // resourceHostUpdate terraform update resource handler
 func resourceHostUpdate(d *schema.ResourceData, m interface{}) error {
-	// --- DEBUG PANIC ON ENTRY ---
-	// Force a panic immediately upon entering this function during apply.
-	// REMOVE THIS AFTER DEBUGGING.
-	// panic(fmt.Sprintf("DEBUG PANIC: Entered resourceHostUpdate for host %s", d.Id()))
-	// --- END DEBUG PANIC ---
-
 	log.Trace("--- resourceHostUpdate ENTERED for host ID: %s ---", d.Id())
 	api := m.(*zabbix.API)
 
@@ -879,12 +873,6 @@ func resourceHostUpdate(d *schema.ResourceData, m interface{}) error {
 		log.Trace("Old groups state: %#v", old)
 		log.Trace("New groups config: %#v", new)
 
-		// --- DEBUG PANIC ---
-		// Force a panic to inspect the data structures when logging fails.
-		// REMOVE THIS AFTER DEBUGGING.
-		// panic(fmt.Sprintf("DEBUG PANIC: Change detected for 'groups'.\nOld State: %#v\nNew Config: %#v", old, new))
-		// --- END DEBUG PANIC ---
-
 		newSet := new.(*schema.Set)
 
 		// Always send the complete new set of groups when there's a change
@@ -910,12 +898,6 @@ func resourceHostUpdate(d *schema.ResourceData, m interface{}) error {
 	item.HostID = d.Id()
 
 	items := []zabbix.Host{*item}
-
-	// --- DEBUG PANIC Before Update Call ---
-	// Force a panic to inspect the data being sent to the API library.
-	// REMOVE THIS AFTER DEBUGGING.
-	// panic(fmt.Sprintf("DEBUG PANIC Before api.HostsUpdate (HostID: %s):\nItem Data: %#v", d.Id(), items))
-	// --- END DEBUG PANIC ---
 
 	log.Trace("Calling api.HostsUpdate for host %s with item data: %#v", d.Id(), items)
 	err = api.HostsUpdate(items)
