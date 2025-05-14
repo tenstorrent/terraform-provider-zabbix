@@ -57,7 +57,7 @@ jobs:
           gpg-connect-agent reloadagent /bye
       -
         name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6.3
+        uses: goreleaser/goreleaser-action@v6
         with:
           version: 2.9.0
           args: release --clean
