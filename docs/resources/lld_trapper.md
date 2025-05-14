@@ -25,7 +25,7 @@ description: |-
 
 - `condition` (Block List) (see [below for nested schema](#nestedblock--condition))
 - `delay` (String) LLD Delay period
-- `evaltype` (String) EvalType, one of: andor, and, or, custom
+- `evaltype` (String) EvalType, one of: and, or, custom, andor
 - `formula` (String) Formula
 - `lifetime` (String) LLD Stale Item Lifetime
 - `macro` (Block Set) (see [below for nested schema](#nestedblock--macro))

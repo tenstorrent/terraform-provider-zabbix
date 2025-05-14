@@ -21,7 +21,7 @@ description: |-
 - `key` (String) Item KEY
 - `master_itemid` (String) Master Item ID
 - `name` (String) Item Name
-- `valuetype` (String) Item Value Type, one of: float, character, log, unsigned, text
+- `valuetype` (String) Item Value Type, one of: float, character, log, unsigned, text, binary
 
 ### Optional
 

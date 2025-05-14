@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/ppodevlabs/go-zabbix-api"
+	"github.com/tenstorrent/go-zabbix-api"
 )
 
 // Provider definition
@@ -62,6 +62,7 @@ func Provider() *schema.Provider {
 			"zabbix_proxy":       dataProxy(),
 			"zabbix_hostgroup":   dataHostgroup(),
 			"zabbix_template":    dataTemplate(),
+			"zabbix_proxygroup":  dataProxyGroup(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"zabbix_trigger":       resourceTrigger(),
@@ -70,6 +71,8 @@ func Provider() *schema.Provider {
 			"zabbix_hostgroup":     resourceHostgroup(),
 			"zabbix_host":          resourceHost(),
 			"zabbix_application":   resourceApplication(),
+			"zabbix_proxy":         resourceProxy(),
+			"zabbix_proxygroup":    resourceProxyGroup(),
 
 			"zabbix_graph":       resourceGraph(),
 			"zabbix_proto_graph": resourceProtoGraph(),
@@ -126,14 +129,6 @@ func providerConfigure(d *schema.ResourceData) (meta interface{}, err error) {
 	log.Trace(fmt.Sprintf("token: %s", d.Get("token").(string)))
 	l := logger.New(stderr, "[DEBUG] ", logger.LstdFlags)
 
-	// we need one of these options
-	if (d.Get("username").(string) == "" ||
-		d.Get("password").(string) == "") &&
-		d.Get("token").(string) == "" {
-		log.Error("credentials required")
-		return nil, errors.New("credentials required")
-	}
-
 	api, apierr := zabbix.NewAPI(zabbix.Config{
 		Url:         d.Get("url").(string),
 		TlsNoVerify: d.Get("tls_insecure").(bool),
@@ -144,14 +139,34 @@ func providerConfigure(d *schema.ResourceData) (meta interface{}, err error) {
 		return nil, apierr
 	}
 
-	if d.Get("token").(string) != "" {
-		api.Auth = d.Get("token").(string)
+	// Add debug logging for version
+	log.Trace(fmt.Sprintf("Zabbix version: %d", api.Config.Version))
+	log.Trace(fmt.Sprintf("Using token: %s", d.Get("token").(string)))
+
+	// For Zabbix 7.2+, only API key authentication is supported
+	if api.Config.Version >= 70200 {
+		if d.Get("token").(string) == "" {
+			return nil, errors.New("API key is required for Zabbix 7.2+")
+		}
+		log.Trace("Using API key authentication for Zabbix 7.2+")
+		api.SetAPIKey(d.Get("token").(string))
 	} else {
-		_, err = api.Login(d.Get("username").(string), d.Get("password").(string))
+		// For older versions, use the existing authentication methods
+		if d.Get("token").(string) != "" {
+			log.Trace("Using token authentication for older version")
+			api.Auth = d.Get("token").(string)
+		} else if d.Get("username").(string) != "" && d.Get("password").(string) != "" {
+			log.Trace("Using username/password authentication for older version")
+			_, err = api.Login(d.Get("username").(string), d.Get("password").(string))
+		} else {
+			return nil, errors.New("either token or username/password is required")
+		}
 	}
+
 	meta = api
 	log.Trace("Started zabbix provider got error: %+v", err)
 
+	log.Trace("--- providerConfigure() COMPLETED successfully ---")
 	return
 }
 

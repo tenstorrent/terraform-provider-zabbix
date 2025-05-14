@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/ppodevlabs/go-zabbix-api"
+	"github.com/tenstorrent/go-zabbix-api"
 )
 
 // Item Type Conversion and lookup tables
@@ -18,6 +18,7 @@ var ITEM_VALUE_TYPES = map[string]zabbix.ValueType{
 	"log":       zabbix.Log,
 	"unsigned":  zabbix.Unsigned,
 	"text":      zabbix.Text,
+	"binary":    zabbix.Binary,
 }
 var ITEM_VALUE_TYPES_REV = map[zabbix.ValueType]string{
 	zabbix.Float:     "float",
@@ -25,6 +26,7 @@ var ITEM_VALUE_TYPES_REV = map[zabbix.ValueType]string{
 	zabbix.Log:       "log",
 	zabbix.Unsigned:  "unsigned",
 	zabbix.Text:      "text",
+	zabbix.Binary:    "binary",
 }
 var ITEM_VALUE_TYPES_ARR = []string{
 	"float",
@@ -32,6 +34,7 @@ var ITEM_VALUE_TYPES_ARR = []string{
 	"log",
 	"unsigned",
 	"text",
+	"binary",
 }
 
 // common schema elements for all item types
@@ -267,6 +270,7 @@ func resourceItemUpdate(d *schema.ResourceData, m interface{}, c ItemHandler, r 
 
 	log.Trace("preparing item object for create/update: %#v", item)
 
+	// HostID will be removed in the API client's ItemsUpdate method
 	items := []zabbix.Item{*item}
 
 	var err error
@@ -301,7 +305,6 @@ func resourceItemRead(d *schema.ResourceData, m interface{}, r ItemHandler, prot
 	}
 
 	if prototype {
-		params["selectDiscoveryRule"] = "extend"
 		items, err = api.ProtoItemsGet(params)
 	} else {
 		items, err = api.ItemsGet(params)
@@ -329,10 +332,12 @@ func resourceItemRead(d *schema.ResourceData, m interface{}, r ItemHandler, prot
 	d.Set("description", item.Description)
 	d.Set("history", item.History)
 	d.Set("trends", item.Trends)
-	d.Set("valuetype", ITEM_VALUE_TYPES_REV[item.ValueType])
+	if valueTypeStr, ok := ITEM_VALUE_TYPES_REV[item.ValueType]; ok {
+		d.Set("valuetype", valueTypeStr)
+	}
 	d.Set("preprocessor", flattenItemPreprocessors(item))
-	if prototype && item.DiscoveryRule != nil {
-		d.Set("ruleid", item.DiscoveryRule.ItemID)
+	if prototype {
+		d.Set("ruleid", item.RuleID)
 	}
 
 	applicationSet := schema.NewSet(schema.HashString, []interface{}{})
@@ -357,8 +362,11 @@ func buildItemObject(d *schema.ResourceData, api *zabbix.API, prototype bool) *z
 		History:     d.Get("history").(string),
 		Trends:      d.Get("trends").(string),
 		Description: d.Get("description").(string),
-		ValueType:   ITEM_VALUE_TYPES[d.Get("valuetype").(string)],
 	}
+
+	valueType := ITEM_VALUE_TYPES[d.Get("valuetype").(string)]
+	item.ValueType = valueType
+
 	item.Preprocessors = itemGeneratePreprocessors(d)
 	apps := d.Get("applications").(*schema.Set).List()
 	lst := []string{}

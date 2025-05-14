@@ -22,7 +22,7 @@ description: |-
 - `master_itemid` (String) Master Item ID
 - `name` (String) Item Name
 - `ruleid` (String) LLD Rule ID
-- `valuetype` (String) Item Value Type, one of: float, character, log, unsigned, text
+- `valuetype` (String) Item Value Type, one of: float, character, log, unsigned, text, binary
 
 ### Optional
 

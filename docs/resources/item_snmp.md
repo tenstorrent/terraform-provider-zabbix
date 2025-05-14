@@ -21,7 +21,7 @@ description: |-
 - `key` (String) Item KEY
 - `name` (String) Item Name
 - `snmp_oid` (String) SNMP OID
-- `valuetype` (String) Item Value Type, one of: float, character, log, unsigned, text
+- `valuetype` (String) Item Value Type, one of: float, character, log, unsigned, text, binary
 
 ### Optional
 
@@ -36,10 +36,10 @@ description: |-
 - `snmp3_contextname` (String) Context Name (v3 only)
 - `snmp3_privpassphrase` (String) Priv Passphrase (v3 only)
 - `snmp3_privprotocol` (String) Priv Protocol (v3 only), one of: des, aes
-- `snmp3_securitylevel` (String) Security Level (v3 only), one of: authnopriv, authpriv, noauthnopriv
+- `snmp3_securitylevel` (String) Security Level (v3 only), one of: noauthnopriv, authnopriv, authpriv
 - `snmp3_securityname` (String) Security Name (v3 only)
 - `snmp_community` (String) SNMP Community (v1/v2 only)
-- `snmp_version` (String) SNMP Version, one of: 1, 2, 3
+- `snmp_version` (String) SNMP Version, one of: 2, 3, 1
 - `tag` (Block Set) (see [below for nested schema](#nestedblock--tag))
 - `trends` (String) Item Trends
 
