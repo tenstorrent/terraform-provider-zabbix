@@ -56,6 +56,11 @@ jobs:
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           gpg-connect-agent reloadagent /bye
       -
+        name: Debug - Print GPG fingerprint
+        run: |
+          echo "GPG Fingerprint from step output: ${{ steps.import_gpg.outputs.fingerprint }}"
+          echo "This is what will be passed to GoReleaser"
+      -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:

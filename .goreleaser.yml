@@ -45,8 +45,6 @@ signs:
       - "--batch"
       - "--passphrase-fd"
       - "0"
-      - "--pinentry-mode"
-      - "loopback"
       - "--local-user"
       - "{{ .Env.GPG_FINGERPRINT }}"
       - "--output"
