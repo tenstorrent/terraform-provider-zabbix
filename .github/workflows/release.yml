@@ -47,7 +47,11 @@ jobs:
           # Import GPG private key from secret (base64 decoded)
           echo "${{ secrets.GPG_PRIVATE_KEY_BASE64 }}" | base64 -d | gpg --batch --import
           
-          # Get fingerprint
+          # Debug: List the secret keys (this is safe, shows only public metadata)
+          echo "DEBUG: List of available secret keys:"
+          gpg --list-secret-keys --keyid-format LONG
+          
+          # Get fingerprint with the original command
           GPG_FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
           
           # Debug output
