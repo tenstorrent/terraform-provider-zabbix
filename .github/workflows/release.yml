@@ -44,18 +44,15 @@ jobs:
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           
-          # Import GPG private key from secret (base64 decoded)
-          echo "${{ secrets.GPG_PRIVATE_KEY_BASE64 }}" | base64 -d | gpg --batch --import
+          # Import GPG private key from secret (base64 decoded) and capture output
+          IMPORT_OUTPUT=$(echo "${{ secrets.GPG_PRIVATE_KEY_BASE64 }}" | base64 -d | gpg --batch --import 2>&1)
           
-          # Debug: List the secret keys (this is safe, shows only public metadata)
-          echo "DEBUG: List of available secret keys:"
-          gpg --list-secret-keys --keyid-format LONG
+          # Show the import output
+          echo "$IMPORT_OUTPUT"
           
-          # Get fingerprint with the original command
-          GPG_FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
-          
-          # Debug output
-          echo "GPG Fingerprint detected: $GPG_FINGERPRINT"
+          # Extract key ID from import output
+          GPG_FINGERPRINT=$(echo "$IMPORT_OUTPUT" | grep -o "key [A-F0-9]\{16\}" | head -1 | cut -d' ' -f2)
+          echo "GPG Fingerprint extracted: $GPG_FINGERPRINT"
           
           # Export as environment variable for later steps
           echo "GPG_FINGERPRINT=$GPG_FINGERPRINT" >> $GITHUB_ENV
