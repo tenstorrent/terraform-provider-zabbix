@@ -47,9 +47,14 @@ jobs:
           # Import GPG private key from secret (base64 decoded)
           echo "${{ secrets.GPG_PRIVATE_KEY_BASE64 }}" | base64 -d | gpg --batch --import
           
-          # Get fingerprint (last 16 chars of key ID)
+          # Get fingerprint
           GPG_FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
-          echo "fingerprint=$GPG_FINGERPRINT" >> $GITHUB_OUTPUT
+          
+          # Debug output
+          echo "GPG Fingerprint detected: $GPG_FINGERPRINT"
+          
+          # Export as environment variable for later steps
+          echo "GPG_FINGERPRINT=$GPG_FINGERPRINT" >> $GITHUB_ENV
           
           # Set up GPG for non-interactive signing
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
@@ -58,7 +63,7 @@ jobs:
       -
         name: Debug - Print GPG fingerprint
         run: |
-          echo "GPG Fingerprint from step output: ${{ steps.import_gpg.outputs.fingerprint }}"
+          echo "GPG Fingerprint from environment: $GPG_FINGERPRINT"
           echo "This is what will be passed to GoReleaser"
       -
         name: Run GoReleaser
@@ -67,7 +72,6 @@ jobs:
           version: 2.9.0
           args: release --clean --verbose
         env:
-          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          # GPG_FINGERPRINT is now directly available from GITHUB_ENV
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # GPG_TTY: $(tty)
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
