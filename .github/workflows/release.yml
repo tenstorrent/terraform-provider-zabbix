@@ -44,25 +44,35 @@ jobs:
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           
-          # Import GPG private key from secret (base64 decoded)
-          echo "${{ secrets.GPG_PRIVATE_KEY_BASE64 }}" | base64 -d | gpg --batch --import
+          # Import GPG private key from secret (base64 decoded) and capture output
+          IMPORT_OUTPUT=$(echo "${{ secrets.GPG_PRIVATE_KEY_BASE64 }}" | base64 -d | gpg --batch --import 2>&1)
           
-          # Get fingerprint (last 16 chars of key ID)
-          GPG_FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
-          echo "fingerprint=$GPG_FINGERPRINT" >> $GITHUB_OUTPUT
+          # Show the import output
+          echo "$IMPORT_OUTPUT"
+          
+          # Extract key ID from import output
+          GPG_FINGERPRINT=$(echo "$IMPORT_OUTPUT" | grep -o "key [A-F0-9]\{16\}" | head -1 | cut -d' ' -f2)
+          echo "GPG Fingerprint extracted: $GPG_FINGERPRINT"
+          
+          # Export as environment variable for later steps
+          echo "GPG_FINGERPRINT=$GPG_FINGERPRINT" >> $GITHUB_ENV
           
           # Set up GPG for non-interactive signing
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           gpg-connect-agent reloadagent /bye
       -
+        name: Debug - Print GPG fingerprint
+        run: |
+          echo "GPG Fingerprint from environment: $GPG_FINGERPRINT"
+          echo "This is what will be passed to GoReleaser"
+      -
         name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
-          args: release --clean
+          version: 2.9.0
+          args: release --clean --verbose
         env:
-          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          # GPG_FINGERPRINT is now directly available from GITHUB_ENV
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_TTY: $(tty)
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

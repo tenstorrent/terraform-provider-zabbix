@@ -41,11 +41,17 @@ checksum:
   algorithm: sha256
 signs:
   - artifacts: checksum
-    cmd: bash
     args:
-      - '-c'
-      - 'echo "{{ .Env.GPG_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback -u {{ .Env.GPG_FINGERPRINT }} --detach-sign --output ${signature} ${artifact}'
-    signature: "${artifact}.sig"
+      - "--batch"
+      - "--passphrase-fd"
+      - "0"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+    stdin: '{{ .Env.GPG_PASSPHRASE }}'
 release:
   name_template: '{{ .ProjectName }} v{{ .Version }}'
   # If you want to manually examine the release before its live, uncomment this line:
