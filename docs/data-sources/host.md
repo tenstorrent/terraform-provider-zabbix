@@ -51,6 +51,8 @@ output "host_id" {
 - `ipmi_password` (String, Sensitive) Password used for IPMI checks against this host
 - `ipmi_privilege` (String) IPMI privilege level, one of: admin, callback, oem, operator, user
 - `ipmi_username` (String) Username used for IPMI checks against this host
+- `monitored_by` (String) What monitors the host, one of: proxy, proxy_group, server. Always derived from `proxyid` and `proxy_groupid` -- leave it out and the plan shows the derived value. Setting it is only a cross-check: a value that disagrees with them is an error. Zabbix's numeric codes 0, 1, 2 are accepted as aliases, for configurations written against tenstorrent/zabbix v0.18
+- `proxy_groupid` (String) ID of the proxy group (`zabbix_proxygroup`) monitoring this host, or "0" for none. Mutually exclusive with `proxyid`. Zabbix 7.0 and later
 - `proxyid` (String) ID of the proxy monitoring this host, or "0" for the Zabbix server itself. Sets `monitored_by` accordingly on Zabbix 7.0 and later
 - `tls_accept` (String) Encryption accepted for incoming connections from the host, one of: cert, psk, unencrypted. Zabbix stores this as a bitmask and the frontend allows combinations; only a single mode is expressible here
 - `tls_connect` (String) Encryption used for outgoing connections to the host, one of: cert, psk, unencrypted

@@ -79,7 +79,7 @@ func Provider() *schema.Provider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"zabbix_host":          dataHost(),
+			"zabbix_host":          ttDataHost(), // TT-PATCH: TT-003 (was dataHost())
 			"zabbix_proxy":         dataProxy(),
 			"zabbix_proxygroup":    dataProxyGroup(), // TT-PATCH: TT-001
 			"zabbix_hostgroup":     dataHostgroup(),
@@ -92,7 +92,7 @@ func Provider() *schema.Provider {
 			"zabbix_template":      resourceTemplate(),
 			"zabbix_hostgroup":     resourceHostgroup(),
 			"zabbix_templategroup": resourceTemplategroup(),
-			"zabbix_host":          resourceHost(),
+			"zabbix_host":          ttResourceHost(),     // TT-PATCH: TT-003 (was resourceHost())
 			"zabbix_proxy":         ttResourceProxy(),    // TT-PATCH: TT-002 (was resourceProxy())
 			"zabbix_proxygroup":    resourceProxyGroup(), // TT-PATCH: TT-001
 

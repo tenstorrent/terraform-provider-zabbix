@@ -1000,6 +1000,10 @@ func buildHostObject(d *schema.ResourceData, m interface{}) (*zabbix.Host, error
 		item.Status = 1
 	}
 
+	if err := ttHostMonitoring(d, m, &item); err != nil { // TT-PATCH: TT-003
+		return nil, err
+	}
+
 	item.GroupIds = buildHostGroupIds(d.Get("groups").(*schema.Set))
 	item.TemplateIDs = buildTemplateIds(d.Get("templates").(*schema.Set))
 
@@ -1146,6 +1150,7 @@ func hostRead(d *schema.ResourceData, m interface{}, params zabbix.Params, owned
 	d.Set("name", host.Name)
 	d.Set("host", host.Host)
 	d.Set("proxyid", host.ProxyID)
+	ttHostSetMonitoring(d, m.(*zabbix.API), host) // TT-PATCH: TT-003
 	d.Set("enabled", host.Status == 0)
 	d.Set("inventory_mode", HINV_LOOKUP_REV[host.InventoryMode])
 

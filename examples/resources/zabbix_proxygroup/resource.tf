@@ -21,3 +21,19 @@ resource "zabbix_proxy" "site" {
   tls_issuer  = "CN=Example CA"
   tls_subject = "CN=${each.value},O=Zabbix Proxy"
 }
+
+resource "zabbix_hostgroup" "site" {
+  name = "Sites/EU West"
+}
+
+# Monitored by whichever proxy in the group the server assigns.
+resource "zabbix_host" "example" {
+  host          = "server-1.eu-west.example.com"
+  groups        = [zabbix_hostgroup.site.id]
+  proxy_groupid = zabbix_proxygroup.site.id
+
+  interface {
+    type = "agent"
+    dns  = "server-1.eu-west.example.com"
+  }
+}
