@@ -68,7 +68,7 @@ func resourceProxyGroup() *schema.Resource {
 		Update: resourceProxyGroupUpdate,
 		Delete: resourceProxyGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: importByIDOrName(proxyGroupIDByName), // TT-004: by id or by name
 		},
 		Schema: s,
 	}

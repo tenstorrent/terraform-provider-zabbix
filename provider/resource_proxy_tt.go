@@ -53,6 +53,7 @@ func ttResourceProxy() *schema.Resource {
 	r.Schema["local_port"].Default = zabbix.ProxyDefaultPort
 
 	r.CustomizeDiff = ttChainCustomizeDiff(r.CustomizeDiff, ttProxyGroupCustomizeDiff)
+	r.Importer = &schema.ResourceImporter{State: importByIDOrName(proxyIDByName)} // TT-004: by id or by name
 	return r
 }
 
