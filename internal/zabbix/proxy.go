@@ -95,6 +95,8 @@ type Proxy struct {
 	// proxy.get, so ProxiesGet always leaves them empty.
 	TLSPSKIdentity string
 	TLSPSK         string
+
+	proxyGroupMembership // TT-PATCH: TT-002
 }
 
 // Proxies is an array of Proxy
@@ -120,6 +122,8 @@ type proxyResponse struct {
 	Address          string `json:"address"`
 	Port             string `json:"port"`
 	AllowedAddresses string `json:"allowed_addresses"`
+
+	proxyGroupMembership // TT-PATCH: TT-002
 
 	// common
 	Description string `json:"description"`
@@ -213,6 +217,7 @@ func (api *API) proxyFromResponse(w proxyResponse) (p Proxy) {
 			p.Port = w.Port
 		}
 		p.AllowedAddresses = w.AllowedAddresses
+		proxyGroupFromResponse(&p, w) // TT-PATCH: TT-002
 		return
 	}
 
@@ -280,6 +285,7 @@ func (api *API) proxyParams(p Proxy) Params {
 		} else {
 			out["allowed_addresses"] = p.AllowedAddresses
 		}
+		proxyGroupParams(out, p) // TT-PATCH: TT-002
 		return out
 	}
 

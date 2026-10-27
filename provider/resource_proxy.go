@@ -228,6 +228,10 @@ func buildProxyObject(d *schema.ResourceData) (*zabbix.Proxy, error) {
 		TLSPSK:         d.Get("tls_psk").(string),
 	}
 
+	if err := ttProxyGroupMembership(d, &proxy); err != nil { // TT-PATCH: TT-002
+		return nil, err
+	}
+
 	address := d.Get("address").(string)
 	port := d.Get("port").(string)
 	allowed := d.Get("allowed_addresses").(string)
@@ -362,6 +366,7 @@ func proxyRead(d *schema.ResourceData, m interface{}, params zabbix.Params) erro
 	}
 	d.Set("address", address)
 	d.Set("port", port)
+	ttSetProxyGroupMembership(d, proxy) // TT-PATCH: TT-002
 
 	// tls_psk_identity / tls_psk are write-only in the API and deliberately
 	// not set here: there is no value to read, and writing an empty string

@@ -93,7 +93,7 @@ func Provider() *schema.Provider {
 			"zabbix_hostgroup":     resourceHostgroup(),
 			"zabbix_templategroup": resourceTemplategroup(),
 			"zabbix_host":          resourceHost(),
-			"zabbix_proxy":         resourceProxy(),
+			"zabbix_proxy":         ttResourceProxy(),    // TT-PATCH: TT-002 (was resourceProxy())
 			"zabbix_proxygroup":    resourceProxyGroup(), // TT-PATCH: TT-001
 
 			"zabbix_graph":       resourceGraph(),

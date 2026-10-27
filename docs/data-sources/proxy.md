@@ -56,8 +56,11 @@ resource "zabbix_host" "example" {
 - `allowed_addresses` (String) Comma delimited list of addresses the proxy may connect from, active proxies only
 - `description` (String) Description of the proxy
 - `id` (String) The ID of this resource.
+- `local_address` (String) Address (IP or DNS name) that active agents of hosts monitored by the proxy group are redirected to in order to reach this proxy. Required when `proxy_groupid` is set, and must be empty when it is not. Zabbix 7.0 and later
+- `local_port` (String) Port that goes with `local_address`. Only a proxy in a proxy group can use anything other than the default. Zabbix 7.0 and later
 - `operating_mode` (String) How the proxy and server connect, one of: active, passive (Zabbix calls this "status" before 7.0)
 - `port` (String) Port the server connects to, passive proxies only
+- `proxy_groupid` (String) ID of the proxy group (`zabbix_proxygroup`) the proxy belongs to, or "0" for none. A proxy in a group needs `local_address`. Zabbix 7.0 and later
 - `tls_accept` (String) Encryption accepted from an active proxy, one of: cert, psk, unencrypted
 - `tls_connect` (String) Encryption used when the server connects to a passive proxy, one of: cert, psk, unencrypted
 - `tls_issuer` (String) Certificate issuer, requires certificate encryption
