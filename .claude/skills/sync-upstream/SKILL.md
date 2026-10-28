@@ -1,6 +1,6 @@
 ---
 name: sync-upstream
-description: Rebase the tenstorrent/zabbix provider fork onto a new tpretz/terraform-provider-zabbix release - fetch upstream, review its CHANGELOG/MIGRATING for breaking changes, fast-forward the upstream-v2 mirror, re-apply the tt: patch series from PATCHES.md, resolve conflicts, run build/vet/unit/acceptance tests on Zabbix 7.4 (plus upstream's gating matrix), update the manifest and consumer migration note, and open a draft PR. Use when someone says "new tpretz release", "sync upstream", "rebase on upstream", "upstream vX.Y.Z available", or an `upstream-sync` issue is opened.
+description: Rebase the tenstorrent/zabbix provider fork onto a new tpretz/terraform-provider-zabbix release - fetch upstream, review its CHANGELOG/MIGRATING for breaking changes, fast-forward the upstream-v2 mirror, re-apply the tt: patch series from PATCHES.md, resolve conflicts, run build/vet/unit/acceptance tests on Zabbix 7.4 (plus upstream's gating matrix), update the manifest and consumer migration note, and open a draft PR. Use when someone says "new tpretz release", "sync upstream", "rebase on upstream", "upstream vX.Y.Z available".
 ---
 
 # sync-upstream

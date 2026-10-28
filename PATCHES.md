@@ -36,6 +36,7 @@ patches are applied (see the skill).
 | 6 | TT-900 | `tt: TT-900 fork docs: ...` | none |
 | 7 | TT-901 | `tt: TT-901 upstream sync tooling: ...` | none |
 | 8 | TT-902 | `tt: TT-902 CI: ...` | none |
+| 9 | TT-006 | `tt: TT-006 no automated upstream or dependency flow` | none (deletes files TT-902 added and upstream's dependabot.yml) |
 
 Base: `upstream-v2` at tpretz `v2` commit `f6077b7`, which is upstream `v2.0.0`
 plus two post-release commits on `v2`: a release-manifest checksum fix and dependency/stdlib security bumps.
@@ -240,12 +241,24 @@ plus two post-release commits on `v2`: a release-manifest checksum fix and depen
     `main`/`upstream-v2`. It runs build, vet, gofmt, unit tests, docs-check,
     shellcheck, and acceptance tests on Zabbix 6.0, 7.0 and 7.4 using upstream's
     `docker-compose.test.yml` and Makefile targets.
-  - `.github/workflows/tt-upstream-watch.yml` runs daily. It reads tpretz's
-    releases and tags (read-only) and opens or updates one tracking issue in
-    this repository when a newer upstream release exists.
-- **Files.** New: those two workflow files.
+- **Policy.** There is no automated upstream watcher and no Dependabot: syncs
+  are started by a human (see the sync-upstream skill), and Issues stay off.
+  (TT-006 removes the watcher workflow and `.github/dependabot.yml`.)
+- **Files.** New: `tt-ci.yml`.
 - **Conflict likelihood: none.** Upstream's own `ci.yml`, `nightly.yml` and
   `release.yml` are untouched and keep working. See TT-FORK.md for their
   behaviour on our branch names.
 - **Tests that prove it.** The workflows run on this PR.
 - **Drop when** never, while the fork exists.
+
+## TT-006: no automated upstream or dependency flow
+
+- **Intent.** Policy decision (Mike Sollanych, 2026-10-27): no issues on this
+  repository and no auto-upgrade flow. Removes `.github/workflows/tt-upstream-watch.yml`
+  (the daily upstream watcher that filed an issue) and `.github/dependabot.yml`
+  (version-update PRs on the default branch).
+- **Files.** Deleted: those two files.
+- **Conflict likelihood: low.** Conflicts only if upstream edits
+  `dependabot.yml`; resolve by keeping it deleted.
+- **Tests that prove it.** None needed; CI still runs on every PR.
+- **Drop when** the policy changes.

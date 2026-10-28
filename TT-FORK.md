@@ -64,8 +64,10 @@ First, review and approve the initial PR, `v2-rebase-7.4` into `upstream-v2`, bu
 4. In Settings → Branches, protect `main` (PR required, `tt-ci` checks
    required), and protect `upstream-v2` (restrict pushes to the sync
    maintainers, no deletions).
-5. Enable **Issues**. They are currently disabled, and the upstream watcher and
-   upstream's nightly workflow both file issues.
+5. Leave **Issues disabled** (policy: no issues on this repo). Disable
+   upstream's nightly workflow, which files a `nightly-failure` issue and would
+   fail without Issues: `gh workflow disable nightly.yml`. This is repo state,
+   not a code change, so it adds no upstream conflict.
 6. Leave `master` alone, or delete it after a grace period, since it equals
    `legacy-v0.18`.
 
@@ -146,9 +148,8 @@ which is what makes exact pins necessary.
 | Workflow | Origin | Triggers | What it verifies |
 |---|---|---|---|
 | `tt-ci.yml` | ours (TT-902) | every PR; pushes to `main`, `upstream-v2` | build, vet, gofmt, unit tests (including the schema, enum and coverage guards), `make docs-check`, shellcheck, and acceptance on Zabbix **6.0, 7.0, 7.4** (`make testenv-up-<v>` + `make test<v>`, upstream's compose stacks) |
-| `tt-upstream-watch.yml` | ours (TT-902) | daily, manual | reads tpretz releases and tags (read-only). Opens or updates one issue labelled `upstream-sync` when a newer release than our base exists. |
 | `ci.yml` | upstream | PRs; pushes to `v2` (a branch we do not have) | build, vet, unit, gofmt |
-| `nightly.yml` | upstream | schedule (default branch only), manual | acceptance on 6.0/7.0/7.4/8.0 and a `nightly-failure` issue. It starts running nightly once `main` is the default branch. |
+| `nightly.yml` | upstream | schedule (default branch only), manual | acceptance on 6.0/7.0/7.4/8.0 and a `nightly-failure` issue. Disabled by policy (it files issues, and Issues are off); see Moving to main. |
 | `release.yml` | upstream | tag `v2.*` | GoReleaser + GPG signing (see above) |
 
 Building from source needs **Go 1.26.10** or later (TT-005 raises upstream's
@@ -167,3 +168,10 @@ consumer notes.
 own client in `internal/zabbix`. The repo is only needed to build the
 `legacy-v0.18` line. **Recommendation: archive it again**, with a README note
 pointing here. Unarchive it only if a v0.18.x hotfix is ever needed.
+
+## Upstream docs that do not apply here
+
+Upstream's RELEASING.md, MAINTAINING.md and PLAN.md describe Dependabot, an
+issue-filing nightly workflow and Issues being enabled. On this fork, by policy
+(TT-006): no Dependabot, no issues, no automated upgrade flow. Upstream docs are
+left unedited to keep syncs conflict-free; this section overrides them.
