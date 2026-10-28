@@ -7,6 +7,7 @@
 # schema/enum/coverage guards), docs drift, and the acceptance suite against
 # real Zabbix 7.4, 7.0 and 6.0 using upstream's own compose stacks and
 # Makefile targets, so nothing here has to track upstream's test harness.
+# 7.2 (production's version) runs from our overlay, docker-compose.tt.yml.
 name: tt-ci
 
 on:
@@ -103,8 +104,14 @@ jobs:
       matrix:
         include:
           - { version: "74", label: "7.4" }
+          # 7.2 is what tenstorrent production runs; its stack is our overlay
+          # (docker-compose.tt.yml), not upstream's compose file.
+          - { version: "72", label: "7.2", overlay: "-f docker-compose.tt.yml" }
           - { version: "70", label: "7.0 LTS" }
           - { version: "60", label: "6.0 LTS" }
+    env:
+      COMPOSE: docker compose -f docker-compose.test.yml ${{ matrix.overlay }}
+      ZBX_PORT_72: "8072"
     steps:
       - uses: actions/checkout@v4
 
@@ -121,17 +128,19 @@ jobs:
           terraform_version: ${{ steps.tfver.outputs.version }}
           terraform_wrapper: false
 
-      - name: Bring up the Zabbix ${{ matrix.label }} stack (upstream's docker-compose.test.yml)
-        run: make testenv-up-${{ matrix.version }}
+      # VERSIONS on the command line overrides the Makefile's list, so the
+      # per-version targets exist for the overlay's 72 as well.
+      - name: Bring up the Zabbix ${{ matrix.label }} stack
+        run: make VERSIONS=${{ matrix.version }} testenv-up-${{ matrix.version }}
 
       - name: Acceptance tests
-        run: make test${{ matrix.version }}
+        run: make VERSIONS=${{ matrix.version }} test${{ matrix.version }}
 
       - name: Stack diagnostics
         if: failure()
         run: |
-          docker compose -f docker-compose.test.yml ps
-          docker compose -f docker-compose.test.yml logs --no-color --tail=300 \
+          $COMPOSE ps
+          $COMPOSE logs --no-color --tail=300 \
             zabbix-db-${{ matrix.version }} zabbix-server-${{ matrix.version }} zabbix-web-${{ matrix.version }}
 
       - name: Upload the acceptance log

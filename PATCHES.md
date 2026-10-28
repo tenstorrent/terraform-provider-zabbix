@@ -11,7 +11,7 @@ comment. You can list our whole footprint in upstream files with:
 
 ```bash
 git grep -n 'TT-PATCH' -- ':!*_tt.go' ':!*tt_*_test.go' ':!PATCHES.md' ':!TT-*.md' ':!AGENTS.md' \
-  ':!.claude' ':!scripts' ':!.github/workflows/tt-*' \
+  ':!.claude' ':!scripts' ':!.github/workflows/tt-*' ':!docker-compose.tt.yml' \
   ':!internal/zabbix/proxygroup.go' ':!provider/resource_proxygroup.go'
 ```
 
@@ -241,10 +241,14 @@ plus two post-release commits on `v2`: a release-manifest checksum fix and depen
     `main`/`upstream-v2`. It runs build, vet, gofmt, unit tests, docs-check,
     shellcheck, and acceptance tests on Zabbix 6.0, 7.0 and 7.4 using upstream's
     `docker-compose.test.yml` and Makefile targets.
+  - Acceptance on Zabbix 7.2.15, production's version, from `docker-compose.tt.yml`:
+    an overlay that `extends` upstream's 7.0 services with 7.2 images, driven by
+    Makefile overrides (`VERSIONS=72`, `COMPOSE`, `ZBX_PORT_72`) so upstream's
+    compose file and Makefile stay untouched. Drop it once production is on 7.4.
 - **Policy.** There is no automated upstream watcher and no Dependabot: syncs
   are started by a human (see the sync-upstream skill), and Issues stay off.
   (TT-006 removes the watcher workflow and `.github/dependabot.yml`.)
-- **Files.** New: `tt-ci.yml`.
+- **Files.** New: `.github/workflows/tt-ci.yml`, `docker-compose.tt.yml`.
 - **Conflict likelihood: none.** Upstream's own `ci.yml`, `nightly.yml` and
   `release.yml` are untouched and keep working. See TT-FORK.md for their
   behaviour on our branch names.

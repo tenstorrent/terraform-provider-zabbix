@@ -1,0 +1,28 @@
+# TT-PATCH: TT-902 -- whole file. Zabbix 7.2 stack, the version tenstorrent's
+# production and staging servers run until they move to 7.4.
+#
+# An overlay on upstream's docker-compose.test.yml, so that file stays untouched:
+# each service extends upstream's 7.0 service and swaps image, DB host and port.
+# Upstream's Makefile drives it through command-line/env overrides:
+#
+#     export COMPOSE="docker compose -f docker-compose.test.yml -f docker-compose.tt.yml"
+#     export ZBX_PORT_72=8072
+#     make VERSIONS=72 testenv-up-72 test72
+#
+# Drop this when production is on 7.4 (or upstream adds a 7.2 stack).
+
+services:
+  zabbix-db-72:
+    extends: { file: docker-compose.test.yml, service: zabbix-db-70 }
+    image: postgres:17-alpine
+  zabbix-server-72:
+    extends: { file: docker-compose.test.yml, service: zabbix-server-70 }
+    image: "zabbix/zabbix-server-pgsql:ubuntu-7.2.15"
+    environment: { DB_SERVER_HOST: zabbix-db-72 }
+    depends_on: !override { zabbix-db-72: { condition: service_healthy } }
+  zabbix-web-72:
+    extends: { file: docker-compose.test.yml, service: zabbix-web-70 }
+    image: "zabbix/zabbix-web-nginx-pgsql:ubuntu-7.2.15"
+    ports: !override ["8072:8080"]
+    environment: { DB_SERVER_HOST: zabbix-db-72, ZBX_SERVER_HOST: zabbix-server-72 }
+    depends_on: !override { zabbix-db-72: { condition: service_healthy }, zabbix-server-72: { condition: service_started } }

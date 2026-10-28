@@ -115,7 +115,7 @@ do not reuse them.
 
 ## Release steps (human-approved; agents stop at step 3)
 
-1. Make sure `main` is green. `tt-ci` must pass on 6.0/7.0/7.4. If the nightly
+1. Make sure `main` is green. `tt-ci` must pass on 6.0/7.0/7.2/7.4. If the nightly
    workflow is enabled, check its run too.
 2. Run the release gate locally if you want the 8.0 signal as well:
    `make release-gate`.
@@ -147,7 +147,7 @@ which is what makes exact pins necessary.
 
 | Workflow | Origin | Triggers | What it verifies |
 |---|---|---|---|
-| `tt-ci.yml` | ours (TT-902) | every PR; pushes to `main`, `upstream-v2` | build, vet, gofmt, unit tests (including the schema, enum and coverage guards), `make docs-check`, shellcheck, and acceptance on Zabbix **6.0, 7.0, 7.4** (`make testenv-up-<v>` + `make test<v>`, upstream's compose stacks) |
+| `tt-ci.yml` | ours (TT-902) | every PR; pushes to `main`, `upstream-v2` | build, vet, gofmt, unit tests (including the schema, enum and coverage guards), `make docs-check`, shellcheck, and acceptance on Zabbix **6.0, 7.0, 7.2, 7.4** (`make testenv-up-<v>` + `make test<v>`; upstream's compose stacks, plus our `docker-compose.tt.yml` overlay for 7.2, production's version) |
 | `ci.yml` | upstream | PRs; pushes to `v2` (a branch we do not have) | build, vet, unit, gofmt |
 | `nightly.yml` | upstream | schedule (default branch only), manual | acceptance on 6.0/7.0/7.4/8.0 and a `nightly-failure` issue. Disabled by policy (it files issues, and Issues are off); see Moving to main. |
 | `release.yml` | upstream | tag `v2.*` | GoReleaser + GPG signing (see above) |
