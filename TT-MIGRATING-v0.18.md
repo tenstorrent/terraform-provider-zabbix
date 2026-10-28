@@ -249,8 +249,11 @@ instead of `depends_on`.
   old `host`. Both repos set `name` explicitly almost everywhere.
 - **Back up state first** (`terraform state pull > backup.tfstate`). After a v2 apply,
   v0.18.1 can no longer read the state, because the host schema version moves to 1.
-- **The minimum Zabbix version is 6.0**, and proxy groups need 7.0. Production is 7.x,
-  and 7.4 is the target.
+- **The minimum Zabbix version is 6.0**, and proxy groups need 7.0. Production and
+  staging run 7.2.15 until the server upgrade, and 7.4 is the target. `tt-ci` runs the
+  full acceptance suite on 7.2 as well as 6.0, 7.0 and 7.4. v2 sends the proxy name as
+  `name` on every 7.x server; the v0.18.1 `unexpected parameter "host"` failure on
+  `proxy.create` (IT-2421) does not occur.
 
 ## 4. Things in our usage that upstream v2 does *not* support
 
