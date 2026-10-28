@@ -37,6 +37,7 @@ patches are applied (see the skill).
 | 7 | TT-901 | `tt: TT-901 upstream sync tooling: ...` | none |
 | 8 | TT-902 | `tt: TT-902 CI: ...` | none |
 | 9 | TT-006 | `tt: TT-006 no automated upstream or dependency flow` | none (deletes files TT-902 added and upstream's dependabot.yml) |
+| 10 | TT-007 | `tt: TT-007 release workflow token can create releases` | none |
 
 Base: `upstream-v2` at tpretz `v2` commit `f6077b7`, which is upstream `v2.0.0`
 plus two post-release commits on `v2`: a release-manifest checksum fix and dependency/stdlib security bumps.
@@ -266,3 +267,18 @@ plus two post-release commits on `v2`: a release-manifest checksum fix and depen
   `dependabot.yml`; resolve by keeping it deleted.
 - **Tests that prove it.** None needed; CI still runs on every PR.
 - **Drop when** the policy changes.
+
+## TT-007: release workflow token can create releases
+
+- **Intent.** Grant `contents: write` to the `goreleaser` job in `release.yml`.
+- **Why we need it.** The tenstorrent org defaults `GITHUB_TOKEN` to read-only.
+  Without this, GoReleaser builds and signs everything and then fails to create
+  the GitHub release with `403 Resource not accessible by integration` (the first
+  `v2.0.0-tt.1` run, 2026-10-28). Scoped to the one job rather than widening the
+  org or repo default for every workflow.
+- **Files.** Upstream edit: `.github/workflows/release.yml`, one tagged line.
+- **Conflict likelihood: low.** Conflicts only if upstream edits the lines around
+  the job's `if:`. If upstream adds its own `permissions`, keep `contents: write`
+  and drop this patch.
+- **Tests that prove it.** The release run creates the GitHub release.
+- **Drop when** upstream's `release.yml` declares `contents: write`.

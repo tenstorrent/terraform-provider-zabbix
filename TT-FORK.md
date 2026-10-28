@@ -137,7 +137,7 @@ do not reuse them.
 | `PASSPHRASE` | repo Actions secret | The key's passphrase. |
 | GPG **public** key | Registry → tenstorrent namespace → Signing keys | It must match the private key above, or the Registry rejects the release. Check it is the key v0.18.x was signed with, or add the new one. |
 | Registry ↔ GitHub link | registry.terraform.io publisher settings | The provider is already published from this repo. The repo was archived and unarchived, so check that the webhook still delivers. |
-| `GITHUB_TOKEN` | automatic | Needs `contents: write` for the release, which is the default for tag-push workflows unless the org restricts it. |
+| `GITHUB_TOKEN` | automatic | Needs `contents: write` for the release. The tenstorrent org defaults it to read-only, so `release.yml` grants it to its job (TT-007). |
 
 GoReleaser does not mark `-tt.N` versions as GitHub pre-releases (no
 `prerelease: auto`). The Registry still records them as semver pre-releases,

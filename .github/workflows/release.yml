@@ -15,6 +15,7 @@ jobs:
     # pattern above is the half that gets widened by accident while editing.
     # If it ever becomes `v*` again, this still refuses a v0.* or v1.* tag.
     if: startsWith(github.ref, 'refs/tags/v2.')
+    permissions: { contents: write } # TT-PATCH: TT-007 org default token is read-only
     steps:
       -
         name: Checkout
