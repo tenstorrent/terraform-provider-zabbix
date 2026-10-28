@@ -1,7 +1,9 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"hash/crc32"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tenstorrent/go-zabbix-api"
 )
 
@@ -78,4 +80,17 @@ func mergeSchemas(schemas ...map[string]*schema.Schema) map[string]*schema.Schem
 	}
 
 	return n
+}
+
+// hashString returns a stable non-negative hash of s. It matches the
+// former terraform helper/hashcode.String so existing state hashes are unchanged.
+func hashString(s string) int {
+	v := int(crc32.ChecksumIEEE([]byte(s)))
+	if v >= 0 {
+		return v
+	}
+	if -v >= 0 {
+		return -v
+	}
+	return 0
 }
