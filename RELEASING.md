@@ -361,6 +361,8 @@ For `master`:
 - do not delete it, and do not delete or move any `v0.*` tag. Existing
   `terraform init` runs resolve against them.
 
+Optionally open a tracking issue on `master` pointing at v2, for anyone who
+lands there from an old link.
 
 ### 11. Post-release
 
